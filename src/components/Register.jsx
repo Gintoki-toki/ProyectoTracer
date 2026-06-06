@@ -1,23 +1,28 @@
 import { useState } from "react";
-import { loginUsuario } from "../services/api";
+import { registrarUsuario } from "../services/api";
 import { G } from "../styles/global";
 
-export default function Login({ onLogin, onRegistrar }) {
-  const [email, setEmail]       = useState("");
+export default function Register({ onRegistro, onVolver }) {
+  const [nombre,   setNombre]   = useState("");
+  const [email,    setEmail]    = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError]       = useState("");
-  const [loading, setLoading]   = useState(false);
+  const [error,    setError]    = useState("");
+  const [loading,  setLoading]  = useState(false);
 
   const handle = async () => {
     setError("");
-    if (!email || !password) {
+    if (!nombre || !email || !password) {
       setError("Por favor completa todos los campos.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres.");
       return;
     }
     setLoading(true);
     try {
-      const user = await loginUsuario(email, password);
-      onLogin(user);
+      const user = await registrarUsuario(nombre, email, password);
+      onRegistro(user);
     } catch (e) {
       setError(e.message);
       setLoading(false);
@@ -48,7 +53,21 @@ export default function Login({ onLogin, onRegistrar }) {
 
         <p style={{ textAlign: "center", fontSize: "13px", color: G.muted,
           textTransform: "uppercase", letterSpacing: ".06em",
-          marginBottom: "32px" }}>Iniciar Sesión</p>
+          marginBottom: "32px" }}>Crear cuenta</p>
+
+        {/* Campo nombre */}
+        <div style={{ marginBottom: "16px" }}>
+          <input
+            type="text"
+            placeholder="Nombre completo"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            onKeyDown={handleKey}
+            style={{ width: "100%", padding: "13px 16px", border: `1.5px solid ${G.border}`,
+              borderRadius: "12px", fontSize: "14px", outline: "none",
+              background: "#fafffe", color: G.text }}
+          />
+        </div>
 
         {/* Campo email */}
         <div style={{ marginBottom: "16px" }}>
@@ -68,7 +87,7 @@ export default function Login({ onLogin, onRegistrar }) {
         <div style={{ marginBottom: "16px" }}>
           <input
             type="password"
-            placeholder="Contraseña"
+            placeholder="Contraseña (mín. 6 caracteres)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={handleKey}
@@ -85,7 +104,7 @@ export default function Login({ onLogin, onRegistrar }) {
           style={{ width: "100%", padding: "14px", background: G.green,
             color: "#fff", border: "none", borderRadius: "12px",
             fontSize: "15px", fontWeight: "600", cursor: "pointer" }}>
-          {loading ? "Ingresando…" : "Iniciar Sesión"}
+          {loading ? "Registrando…" : "Crear cuenta"}
         </button>
 
         {/* Error */}
@@ -97,23 +116,14 @@ export default function Login({ onLogin, onRegistrar }) {
           </div>
         )}
 
-        {/* Enlace registro */}
+        {/* Volver al login */}
         <div style={{ textAlign: "center", marginTop: "20px",
           fontSize: "13px", color: G.muted }}>
-          ¿No tienes cuenta?{" "}
-          <span onClick={onRegistrar}
+          ¿Ya tienes cuenta?{" "}
+          <span onClick={onVolver}
             style={{ color: G.teal, fontWeight: "600", cursor: "pointer" }}>
-            Regístrate
+            Inicia sesión
           </span>
-        </div>
-
-        {/* Hint credenciales */}
-        <div style={{ marginTop: "16px", padding: "12px 16px",
-          background: G.greenLight, borderRadius: "10px",
-          fontSize: "12px", color: G.teal, lineHeight: "1.7" }}>
-          <strong>Usuarios de prueba:</strong><br />
-          👤 <code>lisa@traceqr.com</code> / <code>usuario123</code><br />
-          🛡️ <code>admin@traceqr.com</code> / <code>admin123</code>
         </div>
 
       </div>

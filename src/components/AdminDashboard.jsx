@@ -34,7 +34,7 @@ export default function AdminDashboard({ user, onLogout }) {
           <div style={{ width: "36px", height: "36px", borderRadius: "50%",
             background: G.gold, display: "flex", alignItems: "center",
             justifyContent: "center", color: "#fff", fontWeight: "700",
-            fontSize: "14px" }}>{user.name[0]}</div>
+            fontSize: "14px" }}>{user.nombre[0]}</div>
           <button onClick={onLogout}
             style={{ padding: "7px 16px", background: "transparent",
               border: `1.5px solid ${G.border}`, borderRadius: "8px",

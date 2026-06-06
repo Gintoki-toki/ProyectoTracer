@@ -29,7 +29,7 @@ export default function UserDashboard({ user, onLogout }) {
           <div style={{ width: "36px", height: "36px", borderRadius: "50%",
             background: G.green, display: "flex", alignItems: "center",
             justifyContent: "center", color: "#fff", fontWeight: "700",
-            fontSize: "14px" }}>{user.name[0]}</div>
+            fontSize: "14px" }}>{user.nombre[0]}</div>
           <button onClick={onLogout}
             style={{ padding: "7px 16px", background: "transparent",
               border: `1.5px solid ${G.border}`, borderRadius: "8px",
@@ -43,7 +43,7 @@ export default function UserDashboard({ user, onLogout }) {
       <div style={{ padding: "36px 32px", maxWidth: "960px", margin: "0 auto" }}>
 
         <h1 style={{ fontSize: "32px", color: G.text, marginBottom: "6px" }}>
-          Hola, {user.name} 🌱
+          Hola, {user.nombre} 🌱
         </h1>
         <p style={{ color: G.muted, fontSize: "14px", marginBottom: "32px" }}>
           Bienvenido de vuelta. Sigues haciendo la diferencia.
