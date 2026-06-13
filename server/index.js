@@ -65,6 +65,87 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+//perfil público de prueba para usuario
+app.get("/api/perfil/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const resultado = await pool.query(
+      `SELECT id, nombre, points
+       FROM usuarios
+       WHERE id = $1`,
+      [id]
+    );
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado." });
+    }
+    res.json(resultado.rows[0]);
+  } catch (e) {
+    console.error("Error al obtener perfil:", e.message);
+    res.status(500).json({ error: "Error interno del servidor." });
+  }
+});
+
+//logica del admin para ver los usuarios
+app.get("/api/usuarios", async (req, res) => {
+  try {
+    const resultado = await pool.query(
+      `SELECT id, nombre, email, role, points, badge
+       FROM usuarios
+       ORDER BY points DESC`
+    );
+    res.json(resultado.rows);
+  } catch (e) {
+    console.error("Error al obtener usuarios:", e.message);
+    res.status(500).json({ error: "Error interno del servidor." });
+  }
+});
+
+//logica para agregar amigos
+// ── Agregar amigo ───────────────────────────────────────────────────────
+app.post("/api/amigos", async (req, res) => {
+  const { usuario_id, amigo_id } = req.body;
+
+  if (usuario_id === amigo_id) {
+    return res.status(400).json({ error: "No puedes agregarte a ti mismo." });
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO amigos (usuario_id, amigo_id)
+       VALUES ($1, $2)`,
+      [usuario_id, amigo_id]
+    );
+    res.status(201).json({ mensaje: "Amigo agregado correctamente." });
+  } catch (e) {
+    if (e.code === "23505") {
+      res.status(400).json({ error: "Ya es tu amigo." });
+    } else {
+      console.error("Error al agregar amigo:", e.message);
+      res.status(500).json({ error: "Error interno del servidor." });
+    }
+  }
+});
+
+// ── Obtener lista de amigos ─────────────────────────────────────────────
+app.get("/api/amigos/:usuario_id", async (req, res) => {
+  const { usuario_id } = req.params;
+
+  try {
+    const resultado = await pool.query(
+      `SELECT u.id, u.nombre, u.points
+       FROM amigos a
+       JOIN usuarios u ON u.id = a.amigo_id
+       WHERE a.usuario_id = $1
+       ORDER BY u.nombre ASC`,
+      [usuario_id]
+    );
+    res.json(resultado.rows);
+  } catch (e) {
+    console.error("Error al obtener amigos:", e.message);
+    res.status(500).json({ error: "Error interno del servidor." });
+  }
+});
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Servidor corriendo en http://0.0.0.0:${PORT}`);
 });

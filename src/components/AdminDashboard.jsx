@@ -1,13 +1,29 @@
+import { useState, useEffect } from "react";
 import { G } from "../styles/global";
-import { USERS } from "../data/users";
+import { obtenerUsuarios } from "../services/api";
 
 export default function AdminDashboard({ user, onLogout }) {
-  const usuarios = USERS.filter((u) => u.role === "user");
+  const [usuarios, setUsuarios] = useState([]);
+  const [loading,  setLoading]  = useState(true);
+
+  useEffect(() => {
+    obtenerUsuarios()
+      .then((data) => {
+        setUsuarios(data);
+        setLoading(false);
+      })
+      .catch((e) => {
+        console.error(e.message);
+        setLoading(false);
+      });
+  }, []);
+
+  const soloUsuarios = usuarios.filter((u) => u.role === "user");
 
   const stats = [
-    { label: "Usuarios totales", value: usuarios.length,                           icon: "👥" },
-    { label: "Puntos otorgados", value: usuarios.reduce((a, u) => a + u.points, 0), icon: "⭐" },
-    { label: "Escaneos hoy",     value: 128,                                        icon: "📲" },
+    { label: "Usuarios totales", value: soloUsuarios.length,                                    icon: "👥" },
+    { label: "Puntos otorgados", value: soloUsuarios.reduce((a, u) => a + (u.points || 0), 0), icon: "⭐" },
+    { label: "Escaneos hoy",     value: 128,                                                     icon: "📲" },
   ];
 
   return (
@@ -86,45 +102,49 @@ export default function AdminDashboard({ user, onLogout }) {
           <h3 style={{ fontSize: "15px", fontWeight: "600",
             marginBottom: "16px", color: G.text }}>Usuarios registrados</h3>
 
-          <table style={{ width: "100%", borderCollapse: "collapse",
-            fontSize: "14px" }}>
-            <thead>
-              <tr>
-                {["Nombre", "Correo", "Rol", "Puntos"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "12px 16px",
-                    fontSize: "12px", fontWeight: "600", color: G.muted,
-                    textTransform: "uppercase", letterSpacing: ".07em",
-                    borderBottom: `2px solid ${G.border}` }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {USERS.map((u, i) => (
-                <tr key={i}>
-                  <td style={{ padding: "14px 16px",
-                    borderBottom: `1px solid ${G.border}` }}>
-                    <strong>{u.name}</strong>
-                  </td>
-                  <td style={{ padding: "14px 16px", color: G.muted,
-                    borderBottom: `1px solid ${G.border}` }}>{u.email}</td>
-                  <td style={{ padding: "14px 16px",
-                    borderBottom: `1px solid ${G.border}` }}>
-                    <span style={{
-                      display: "inline-block", padding: "3px 12px",
-                      borderRadius: "20px", fontSize: "12px", fontWeight: "600",
-                      background: u.role === "admin" ? "#fff3cd" : G.greenLight,
-                      color:      u.role === "admin" ? "#856404" : G.teal }}>
-                      {u.role === "admin" ? "Admin" : "Usuario"}
-                    </span>
-                  </td>
-                  <td style={{ padding: "14px 16px",
-                    borderBottom: `1px solid ${G.border}` }}>
-                    {u.points ? u.points.toLocaleString() : "—"}
-                  </td>
+          {loading ? (
+            <p style={{ color: G.muted, fontSize: "14px" }}>Cargando usuarios...</p>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse",
+              fontSize: "14px" }}>
+              <thead>
+                <tr>
+                  {["Nombre", "Correo", "Rol", "Puntos"].map((h) => (
+                    <th key={h} style={{ textAlign: "left", padding: "12px 16px",
+                      fontSize: "12px", fontWeight: "600", color: G.muted,
+                      textTransform: "uppercase", letterSpacing: ".07em",
+                      borderBottom: `2px solid ${G.border}` }}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {usuarios.map((u, i) => (
+                  <tr key={i}>
+                    <td style={{ padding: "14px 16px",
+                      borderBottom: `1px solid ${G.border}` }}>
+                      <strong>{u.nombre}</strong>
+                    </td>
+                    <td style={{ padding: "14px 16px", color: G.muted,
+                      borderBottom: `1px solid ${G.border}` }}>{u.email}</td>
+                    <td style={{ padding: "14px 16px",
+                      borderBottom: `1px solid ${G.border}` }}>
+                      <span style={{
+                        display: "inline-block", padding: "3px 12px",
+                        borderRadius: "20px", fontSize: "12px", fontWeight: "600",
+                        background: u.role === "admin" ? "#fff3cd" : G.greenLight,
+                        color:      u.role === "admin" ? "#856404" : G.teal }}>
+                        {u.role === "admin" ? "Admin" : "Usuario"}
+                      </span>
+                    </td>
+                    <td style={{ padding: "14px 16px",
+                      borderBottom: `1px solid ${G.border}` }}>
+                      {u.points ? u.points.toLocaleString() : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
       </div>
